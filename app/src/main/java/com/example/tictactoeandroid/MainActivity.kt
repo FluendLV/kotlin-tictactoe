@@ -15,6 +15,7 @@ class MainActivity : AppCompatActivity() {
     private var currentPlayer: Player? = null
     private var gameBoard: Array<Array<Button?>> = arrayOf()
     private var moves = 0
+    private var firstMoveMade = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,6 +72,11 @@ class MainActivity : AppCompatActivity() {
         if (gameBoard[row][col]?.text.isNullOrEmpty()) {
             gameBoard[row][col]?.text = currentPlayer?.name
 
+            if (!firstMoveMade) {
+                disableGameModeSelection()
+                firstMoveMade = true
+            }
+
             if (checkWin(row, col)) {
                 showWinMessage(currentPlayer?.name)
             } else if (++moves == 9) {
@@ -81,6 +87,13 @@ class MainActivity : AppCompatActivity() {
                     handleComputerMove()
                 }
             }
+        }
+    }
+
+    private fun disableGameModeSelection() {
+        val modeRadioGroup = findViewById<RadioGroup>(R.id.modeRadioGroup)
+        for (i in 0 until modeRadioGroup.childCount) {
+            modeRadioGroup.getChildAt(i).isEnabled = false
         }
     }
 
@@ -112,16 +125,41 @@ class MainActivity : AppCompatActivity() {
         val symbol = currentPlayer?.name
 
         // Check row
-        if (gameBoard[row].all { it?.text == symbol }) return true
+        if (gameBoard[row].all { it?.text == symbol }) {
+            val modeRadioGroup = findViewById<RadioGroup>(R.id.modeRadioGroup)
+            for (i in 0 until modeRadioGroup.childCount) {
+                modeRadioGroup.getChildAt(i).isEnabled = true
+            }
+            return true
+        }
 
         // Check column
-        if (gameBoard.map { it[col] }.all { it?.text == symbol }) return true
+        if (gameBoard.map { it[col] }.all { it?.text == symbol }) {
+            val modeRadioGroup = findViewById<RadioGroup>(R.id.modeRadioGroup)
+            for (i in 0 until modeRadioGroup.childCount) {
+                modeRadioGroup.getChildAt(i).isEnabled = true
+            }
+            return true
+        }
 
         // Check main diagonal
-        if (row == col && gameBoard.indices.all { gameBoard[it][it]?.text == symbol }) return true
+        if (row == col && gameBoard.indices.all { gameBoard[it][it]?.text == symbol }) {
+            val modeRadioGroup = findViewById<RadioGroup>(R.id.modeRadioGroup)
+            for (i in 0 until modeRadioGroup.childCount) {
+                modeRadioGroup.getChildAt(i).isEnabled = true
+            }
+            return true
+        }
 
         // Check secondary diagonal
-        if (row + col == 2 && gameBoard.indices.all { gameBoard[it][2 - it]?.text == symbol }) return true
+        if (row + col == 2 && gameBoard.indices.all { gameBoard[it][2 - it]?.text == symbol }) {
+            val modeRadioGroup = findViewById<RadioGroup>(R.id.modeRadioGroup)
+            for (i in 0 until modeRadioGroup.childCount) {
+                modeRadioGroup.getChildAt(i).isEnabled = true
+            }
+            return true
+        }
+
 
         return false
     }
@@ -142,6 +180,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun resetGame() {
+        firstMoveMade = false
         for (i in 0..2) {
             for (j in 0..2) {
                 gameBoard[i][j]?.text = ""
